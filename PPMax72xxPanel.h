@@ -18,8 +18,8 @@
 
  ******************************************************************/
 
-#ifndef Max72xxPanel_h
-#define Max72xxPanel_h
+#ifndef PPMax72xxPanel_h
+#define PPMax72xxPanel_h
 
 #if (ARDUINO >= 100)
   #include <Arduino.h>
@@ -28,7 +28,7 @@
   #include "pins_arduino.h"
 #endif
 
-class Max72xxPanel : public Adafruit_GFX {
+class PPMax72xxPanel : public Adafruit_GFX {
 
 public:
 
@@ -39,7 +39,7 @@ public:
    * hDisplays  number of displays horizontally
    * vDisplays  number of displays vertically
    */
-  Max72xxPanel(byte csPin, byte hDisplays=1, byte vDisplays=1);
+  PPMax72xxPanel(byte csPin, byte hDisplays=1, byte vDisplays=1);
 
 	/*
 	 * Define how the displays are ordered. The first display (0)
@@ -76,7 +76,7 @@ public:
    * one, we have a dedicated function to clear the screen.
    * The color can be 0 (blank) or non-zero (pixel on).
    */
-  void fillScreen(uint16_t color);
+//  void fillScreen(uint16_t color);
 
   /*
    * Set the shutdown (power saving) mode for the device
@@ -92,6 +92,10 @@ public:
    * intensity	the brightness of the display. (0..15)
    */
   void setIntensity(byte intensity);
+
+
+  void setClip(byte xClipS, byte xClipE, byte yClipS, byte yClipE);
+
 
   /*
    * After you're done filling the bitmap buffer with your picture,
@@ -112,9 +116,10 @@ private:
   byte hDisplays;
   byte *matrixPosition;
   byte *matrixRotation;
+  byte xClipS;
+  byte xClipE;
+  byte yClipS;
+  byte yClipE;
 };
 
-#endif	// Max72xxPanel_h
-
-
-
+#endif	// PPMax72xxPanel_h

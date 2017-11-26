@@ -15,7 +15,7 @@
  ******************************************************************/
 
 #include <Adafruit_GFX.h>
-#include "Max72xxPanel.h"
+#include "PPMax72xxPanel.h"
 #include <SPI.h>
 
 // The opcodes for the MAX7221 and MAX7219
@@ -34,17 +34,22 @@
 #define OP_SHUTDOWN    12
 #define OP_DISPLAYTEST 15
 
-Max72xxPanel::Max72xxPanel(byte csPin, byte hDisplays, byte vDisplays) : Adafruit_GFX(hDisplays << 3, vDisplays << 3) {
+PPMax72xxPanel::PPMax72xxPanel(byte csPin, byte hDisplays, byte vDisplays) : Adafruit_GFX(hDisplays << 3, vDisplays << 3) {
 
-  Max72xxPanel::SPI_CS = csPin;
+  PPMax72xxPanel::SPI_CS = csPin;
 
   byte displays = hDisplays * vDisplays;
-  Max72xxPanel::hDisplays = hDisplays;
-	Max72xxPanel::bitmapSize = displays << 3;
+  PPMax72xxPanel::hDisplays = hDisplays;
+	PPMax72xxPanel::bitmapSize = displays << 3;
 
-  Max72xxPanel::bitmap = (byte*)malloc(bitmapSize);
-  Max72xxPanel::matrixRotation = (byte*)malloc(displays);
-  Max72xxPanel::matrixPosition = (byte*)malloc(displays);
+  PPMax72xxPanel::xClipS = 0; // set cliping START point
+  PPMax72xxPanel::xClipE = WIDTH; // set cliping END point
+  PPMax72xxPanel::yClipS = 0; // set cliping START point
+  PPMax72xxPanel::yClipE = HEIGHT; // set cliping END point  
+
+  PPMax72xxPanel::bitmap = (byte*)malloc(bitmapSize);
+  PPMax72xxPanel::matrixRotation = (byte*)malloc(displays);
+  PPMax72xxPanel::matrixPosition = (byte*)malloc(displays);
 
   for ( byte display = 0; display < displays; display++ ) {
   	matrixPosition[display] = display;
@@ -75,31 +80,31 @@ Max72xxPanel::Max72xxPanel(byte csPin, byte hDisplays, byte vDisplays) : Adafrui
   setIntensity(7);
 }
 
-void Max72xxPanel::setPosition(byte display, byte x, byte y) {
+void PPMax72xxPanel::setPosition(byte display, byte x, byte y) {
 	matrixPosition[x + hDisplays * y] = display;
 }
 
-void Max72xxPanel::setRotation(byte display, byte rotation) {
+void PPMax72xxPanel::setRotation(byte display, byte rotation) {
 	matrixRotation[display] = rotation;
 }
 
-void Max72xxPanel::setRotation(uint8_t rotation) {
+void PPMax72xxPanel::setRotation(uint8_t rotation) {
 	Adafruit_GFX::setRotation(rotation);
 }
 
-void Max72xxPanel::shutdown(boolean b) {
+void PPMax72xxPanel::shutdown(boolean b) {
   spiTransfer(OP_SHUTDOWN, b ? 0 : 1);
 }
 
-void Max72xxPanel::setIntensity(byte intensity) {
+void PPMax72xxPanel::setIntensity(byte intensity) {
   spiTransfer(OP_INTENSITY, intensity);
 }
 
-void Max72xxPanel::fillScreen(uint16_t color) {
-  memset(bitmap, color ? 0xff : 0, bitmapSize);
-}
+//void PPMax72xxPanel::fillScreen(uint16_t color) {
+//  memset(bitmap, color ? 0xff : 0, bitmapSize);
+//}
 
-void Max72xxPanel::drawPixel(int16_t xx, int16_t yy, uint16_t color) {
+void PPMax72xxPanel::drawPixel(int16_t xx, int16_t yy, uint16_t color) {
 	// Operating in bytes is faster and takes less code to run. We don't
 	// need values above 200, so switch from 16 bit ints to 8 bit unsigned
 	// ints (bytes).
@@ -122,10 +127,17 @@ void Max72xxPanel::drawPixel(int16_t xx, int16_t yy, uint16_t color) {
 		}
 	}
 
-	if ( x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT ) {
-		// Ignore pixels outside the canvas.
+	// if ( x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT ) {
+	// 	// Ignore pixels outside the canvas.
+	// 	return;
+	// }
+
+  if ( x < xClipS || x >= xClipE || y < yClipS || y >= yClipE ) {
+		// Ignore pixels outside the clipped canvas.
 		return;
 	}
+
+
 
 	// Translate the x, y coordinate according to the layout of the
 	// displays. They can be ordered and rotated (0, 90, 180, 270).
@@ -162,7 +174,15 @@ void Max72xxPanel::drawPixel(int16_t xx, int16_t yy, uint16_t color) {
 	}
 }
 
-void Max72xxPanel::write() {
+void PPMax72xxPanel::setClip(byte xClipS, byte xClipE, byte yClipS, byte yClipE) {
+  PPMax72xxPanel::xClipS = xClipS; // set cliping START point
+  PPMax72xxPanel::xClipE = xClipE; // set cliping END point
+  PPMax72xxPanel::yClipS = yClipS; // set cliping START point
+  PPMax72xxPanel::yClipE = yClipE; // set cliping END point
+}
+
+
+void PPMax72xxPanel::write() {
 	// Send the bitmap buffer to the displays.
 
 	for ( byte row = OP_DIGIT7; row >= OP_DIGIT0; row-- ) {
@@ -170,7 +190,7 @@ void Max72xxPanel::write() {
 	}
 }
 
-void Max72xxPanel::spiTransfer(byte opcode, byte data) {
+void PPMax72xxPanel::spiTransfer(byte opcode, byte data) {
 	// If opcode > OP_DIGIT7, send the opcode and data to all displays.
 	// If opcode <= OP_DIGIT7, display the column with data in our buffer for all displays.
 	// We do not support (nor need) to use the OP_NOOP opcode.
