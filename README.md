@@ -7,7 +7,7 @@ This is a plugin for Adafruit's core graphics library GFX, providing basic graph
 
 Written by Mark Ruys, <mark@paracas.nl>, 2013.
 - original GIT: https://github.com/markruys/arduino-Max72xxPanel
-- and mofify by Peter von Flocke, 2017
+- and mofified by Peter von Flocke, 2017
 
 
 Modification:
