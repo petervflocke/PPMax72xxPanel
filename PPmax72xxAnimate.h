@@ -35,22 +35,22 @@ class PPmax72xxAnimate {
       _READY,          // Ready for animation
       _RUN,            // During animation
       _END             // Display cycle has completed
-    };    
+    };
     fsmState_t      _fsmState;
-    
+
     textEffect_t    _textEffect;
     textEffectMod_t _textEffectMod;
 
     bool      _suspend;     // don't do anything
     uint32_t  _lastRunTime; // the millis() value for when the animation was last run
     uint16_t  _tickTime;    // the time between animations in milliseconds
-    
+
     String _tape;
-    
+
     uint8_t _xClipS;
     uint8_t _xClipE;
     uint8_t _yClipS;
-    uint8_t _yClipE;    
+    uint8_t _yClipE;
     int16_t _x;
     int16_t _y;
     uint16_t _tapeWidth;
@@ -61,11 +61,11 @@ class PPmax72xxAnimate {
   public:
     PPmax72xxAnimate(PPMax72xxPanel *PPMax);
     void setText(String tape, textEffect_t effect, textEffectMod_t mod, uint16_t speed, uint8_t xClipS, uint8_t xClipE);
-    boolean Animate();
+    boolean Animate(boolean _loop);
     inline boolean AnimateStatus() {return _fsmState==_END;};
     inline void Reset() {_fsmState = _READY;};
 
     uint8_t count_ch(const String *str, char ch);
     String nItem(const String *str, char ch, int item);
-    
+
 };
