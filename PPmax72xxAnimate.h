@@ -34,7 +34,8 @@ class PPmax72xxAnimate {
       _INITIALISE,     // Initialize all variables
       _READY,          // Ready for animation
       _RUN,            // During animation
-      _END             // Display cycle has completed
+      _END,            // Animation finished
+      _DOWN            // Display cycle has been completed
     };
     fsmState_t      _fsmState;
 

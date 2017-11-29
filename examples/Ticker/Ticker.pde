@@ -1,12 +1,12 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
-#include <Max72xxPanel.h>
+#include <PPMax72xxPanel.h>
 
 int pinCS = 10; // Attach CS to this pin, DIN to MOSI and CLK to SCK (cf http://arduino.cc/en/Reference/SPI )
 int numberOfHorizontalDisplays = 4;
 int numberOfVerticalDisplays = 1;
 
-Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
+PPMax72xxPanel matrix = PPMax72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
 
 String tape = "Arduino";
 int wait = 20; // In milliseconds
@@ -52,4 +52,3 @@ void loop() {
     delay(wait);
   }
 }
-
