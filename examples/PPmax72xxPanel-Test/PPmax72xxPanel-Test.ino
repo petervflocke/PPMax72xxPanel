@@ -81,21 +81,17 @@ void setup() {
 }
 
 void loop() {
-  static boolean flasher = true;
+  boolean updateDisplay = false;
 
-  zoneText1.Animate(false);
-  zoneText2.Animate(false);
-  zoneText3.Animate(false);
-  matrix.write();
+  updateDisplay = false;
+  updateDisplay |= zoneText1.Animate(false);
+  updateDisplay |=zoneText2.Animate(false);
+  updateDisplay |=zoneText3.Animate(false);
 
-  if (zoneText3.AnimateStatus()) {
+  if (updateDisplay) matrix.write();  // if updated needed write the buffer
+
+  if (zoneText3.AnimateDone()) {
     zoneText3.Reset();
     delay (500);
   }
-
-
-  digitalWrite(ledPin, flasher);
-  //delay(wait);
-  flasher = !flasher;
-
 }

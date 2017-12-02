@@ -41,6 +41,8 @@ public:
    */
   PPMax72xxPanel(byte csPin, byte hDisplays=1, byte vDisplays=1);
 
+  ~PPMax72xxPanel(); // and destructor
+
 	/*
 	 * Define how the displays are ordered. The first display (0)
 	 * is the one closest to the Arduino.
@@ -94,7 +96,7 @@ public:
   void setIntensity(byte intensity);
 
 
-  void setClip(byte xClipS, byte xClipE, byte yClipS, byte yClipE);
+  void setClip(uint16_t xClipS, uint16_t xClipE, uint16_t yClipS, uint16_t yClipE);
 
 
   /*

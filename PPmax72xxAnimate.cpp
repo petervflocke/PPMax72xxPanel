@@ -59,7 +59,7 @@ PPmax72xxAnimate::PPmax72xxAnimate(PPMax72xxPanel *PPMax)
 
 }
 
-void PPmax72xxAnimate::setText(String tape, textEffect_t effect, textEffectMod_t mod, uint16_t speed, uint8_t xClipS, uint8_t xClipE) {
+void PPmax72xxAnimate::setText(String tape, textEffect_t effect, textEffectMod_t mod, uint16_t speed, uint16_t xClipS, uint16_t xClipE) {
   _tape          = tape;
   _textEffect    = effect;
   _textEffectMod = mod;
@@ -103,54 +103,46 @@ boolean PPmax72xxAnimate::Animate(boolean _loop) {
     _fsmState = _RUN;
     _lastRunTime = millis()-_tickTime;
   }
-  if (_fsmState == _END) _fsmState == _DOWN;
+  if (_fsmState == _DOWN || _fsmState == _END) _fsmState = _DOWN;
   else do {
       if (_fsmState == _RUN && (millis() - _lastRunTime >= _tickTime) ) {
         _lastRunTime = millis();
         _PPMax->setClip(_xClipS, _xClipE, _yClipS, _yClipE);
-        //_PPMax->fillScreen(LOW);
-
         switch (_textEffect) {
           case _SCROLL_LEFT:
             if ( (_x > _xClipS && _textEffectMod == _TO_LEFT) || ( _x+_tapeWidth > _xClipE && _textEffectMod == _TO_RIGHT) || (_x+_tapeWidth > _xClipS && _textEffectMod == _TO_FULL) ) {
               _PPMax->setCursor(_x,_y);
               _PPMax->print(_tape);
               _x --;
-              //_PPMax->write();
             } else {
               _PPMax->setCursor(_x,_y);
               _PPMax->print(_tape);
               _fsmState = _END;
             }
             break;
-
           case _SCROLL_RIGHT:
             if ( (_x < _xClipS && _textEffectMod == _TO_LEFT) || ( _x+_tapeWidth < _xClipE && _textEffectMod == _TO_RIGHT) || (_x < _xClipE && _textEffectMod == _TO_FULL) ) {
               _PPMax->setCursor(_x,_y);
               _PPMax->print(_tape);
               _x ++;
-              //_PPMax->write();
             } else {
               _PPMax->setCursor(_x,_y);
               _PPMax->print(_tape);
               _fsmState = _END;
             }
             break;
-
           case _SCROLL_UP:
             if ( _y > 0 ) {
               _PPMax->fillScreen(LOW);
               _PPMax->setCursor(_x,_y);
               _PPMax->print(_tape);
               _y --;
-              //_PPMax->write();
             } else {
               _PPMax->setCursor(_x,_y);
               _PPMax->print(_tape);
               _fsmState = _END;
             }
             break;
-
           case _SCROLL_UP_SMOOTH:
             int iy = _y;
             for (int i = _lineNumber; i < _lineNumber + 2; i++) {
@@ -159,7 +151,6 @@ boolean PPmax72xxAnimate::Animate(boolean _loop) {
               iy += _PPMax->height();
             }
             if (--_y < -_PPMax->height()) {
-              //matrix1.write();
               _y = 0;
               _lineNumber ++;
               if (_lineNumber >= _itemNumber) {
@@ -169,13 +160,12 @@ boolean PPmax72xxAnimate::Animate(boolean _loop) {
               }
              }
             break;
-
         }
         if (_loop) {
           _PPMax->write();
           delay(_tickTime);
         }
-      }
+      } else return false; // no screen update needed
   } while (_loop && (_fsmState != _END) );
   return (_fsmState != _DOWN);
 }

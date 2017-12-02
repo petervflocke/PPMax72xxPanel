@@ -45,7 +45,7 @@ PPMax72xxPanel::PPMax72xxPanel(byte csPin, byte hDisplays, byte vDisplays) : Ada
   PPMax72xxPanel::xClipS = 0; // set cliping START point
   PPMax72xxPanel::xClipE = WIDTH; // set cliping END point
   PPMax72xxPanel::yClipS = 0; // set cliping START point
-  PPMax72xxPanel::yClipE = HEIGHT; // set cliping END point  
+  PPMax72xxPanel::yClipE = HEIGHT; // set cliping END point
 
   PPMax72xxPanel::bitmap = (byte*)malloc(bitmapSize);
   PPMax72xxPanel::matrixRotation = (byte*)malloc(displays);
@@ -57,8 +57,14 @@ PPMax72xxPanel::PPMax72xxPanel(byte csPin, byte hDisplays, byte vDisplays) : Ada
   }
 
   SPI.begin();
-//SPI.setBitOrder(MSBFIRST);
-//SPI.setDataMode(SPI_MODE0);
+  SPI.setDataMode(SPI_MODE0);           // PP: added
+  SPI.setBitOrder(MSBFIRST);            // --//--
+  //SPI.setClockDivider(SPI_CLOCK_DIV2);  //
+
+//   SPI.begin();
+// //SPI.setBitOrder(MSBFIRST);
+// //SPI.setDataMode(SPI_MODE0);
+  digitalWrite(SPI_CS, HIGH);  // PP: init at HIGH
   pinMode(SPI_CS, OUTPUT);
 
   // Clear the screen
@@ -78,6 +84,13 @@ PPMax72xxPanel::PPMax72xxPanel(byte csPin, byte hDisplays, byte vDisplays) : Ada
 
   // Set the brightness to a medium value
   setIntensity(7);
+}
+
+PPMax72xxPanel::~PPMax72xxPanel(void) {  //PP: added destructor
+  SPI.end();	// PP: reset SPI mode
+  free(bitmap);
+  free(matrixRotation);
+  free(matrixPosition);
 }
 
 void PPMax72xxPanel::setPosition(byte display, byte x, byte y) {
@@ -174,11 +187,12 @@ void PPMax72xxPanel::drawPixel(int16_t xx, int16_t yy, uint16_t color) {
 	}
 }
 
-void PPMax72xxPanel::setClip(byte xClipS, byte xClipE, byte yClipS, byte yClipE) {
-  PPMax72xxPanel::xClipS = xClipS; // set cliping START point
-  PPMax72xxPanel::xClipE = xClipE; // set cliping END point
-  PPMax72xxPanel::yClipS = yClipS; // set cliping START point
-  PPMax72xxPanel::yClipE = yClipE; // set cliping END point
+void PPMax72xxPanel::setClip(uint16_t xClipS, uint16_t xClipE, uint16_t yClipS, uint16_t yClipE) {
+
+  PPMax72xxPanel::xClipS = (xClipS > width())  ? width()  : xClipS; // set cliping START point
+  PPMax72xxPanel::xClipE = (xClipE > width())  ? width()  : xClipE; // set cliping END point
+  PPMax72xxPanel::yClipS = (yClipS > height()) ? height() : yClipS; // set cliping START point
+  PPMax72xxPanel::yClipE = (yClipE > height()) ? height() : yClipE; // set cliping END point
 }
 
 
@@ -196,6 +210,9 @@ void PPMax72xxPanel::spiTransfer(byte opcode, byte data) {
 	// We do not support (nor need) to use the OP_NOOP opcode.
 
 	// Enable the line
+  //#define SPI_SPEED 14000000
+  #define SPI_SPEED 10000000
+  SPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0)); // PP add SPI transaction  part
 	digitalWrite(SPI_CS, LOW);
 
 	// Now shift out the data, two bytes per display. The first byte is the opcode,
@@ -211,4 +228,5 @@ void PPMax72xxPanel::spiTransfer(byte opcode, byte data) {
 
 	// Latch the data onto the display(s)
 	digitalWrite(SPI_CS, HIGH);
+  SPI.endTransaction();
 }
