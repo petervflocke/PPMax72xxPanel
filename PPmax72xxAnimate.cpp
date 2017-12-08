@@ -88,6 +88,11 @@ boolean PPmax72xxAnimate::Animate(boolean _loop) {
         _y = 0;
       break;
 
+      case _SCROLL_DOWN:
+        _x = _xClipS;
+        _y = -_PPMax->height();
+      break;
+
       case _SCROLL_UP:
         _x = _xClipS;
         _y = _PPMax->height();
@@ -131,6 +136,18 @@ boolean PPmax72xxAnimate::Animate(boolean _loop) {
               _fsmState = _END;
             }
             break;
+          case _SCROLL_DOWN:
+              if ( _y < 0  ) {
+                _PPMax->fillScreen(LOW);
+                _PPMax->setCursor(_x,_y);
+                _PPMax->print(_tape);
+                _y ++;
+              } else {
+                _PPMax->setCursor(_x,_y);
+                _PPMax->print(_tape);
+                _fsmState = _END;
+              }
+              break;
           case _SCROLL_UP:
             if ( _y > 0 ) {
               _PPMax->fillScreen(LOW);
