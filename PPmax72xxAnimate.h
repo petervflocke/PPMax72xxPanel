@@ -10,6 +10,7 @@ enum textEffect_t
 {
   _NO_EFFECT,           // Used as a place filler, executes no operation
   _PRINT,               // Text just appears (printed)
+  _BLINK,               // Blinking on/off/on...
   _SCROLL_UP,           // Text scrolls up through the display
   _SCROLL_DOWN,         // Text scrolls down through the display
   _SCROLL_LEFT,         // Text scrolls right to left on the display, allign to the first left character
@@ -43,6 +44,7 @@ class PPmax72xxAnimate {
     textEffectMod_t _textEffectMod;
 
     bool      _suspend;     // don't do anything
+    bool      _onoff;       // on/off display text used for blinking mode
     uint32_t  _lastRunTime; // the millis() value for when the animation was last run
     uint16_t  _tickTime;    // the time between animations in milliseconds
 
